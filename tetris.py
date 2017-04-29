@@ -2,9 +2,54 @@
 The main file for the Tetris game
 """
 
-from tetris_gui import *
+import random
 import tkinter as tk
 
+from tetris_gui import *
+
+class TetrisPiece:
+    """
+    class responsible for the pieces and their movements
+    """
+
+    def __init__(self, rotations, board):
+        "Create a new TetrisPoece from a given point list"
+        self.all_rotations = rotations
+        self.rotation_index = 0 # TODO: randomize it
+        self.board = board
+        self.color = random.sample(self.ALL_COLORS, 1)[0]
+        self.moved = True
+        self.position = (4, 1)
+
+    @classmethod
+    def generate_piece(cls, board):
+        return TetrisPiece(random.sample(cls.ALL_PIECES, 1)[0], board)
+    
+    ALL_PIECES = [[[(0, 0), (1, 0), (0, 1), (1, 1)]], # square
+                  [[(0, 0), (-1, 0), (1, 0), (2, 0)], # long
+                   [(0, 0), (0, -1), (0, 1), (0, 2)]]]
+        
+    ALL_COLORS = ['DarkGreen', 'dark blue', 'blue', 'dark red', 'gold2',
+                    'Purple3', 'OrangeRed2', 'LightSkyBlue']
+        
+
+class TetrisBoard:
+    """
+    Does the interaction between the pieces and the game itself
+    """
+
+    def __init__(self, game):
+        "Initialize the board"
+        self.game = game
+        
+        self.block_size = 18
+        self.columns_count = 10
+        self.rows_count = 27
+        
+        self.score = 0
+        self.level = 1
+        self.current_block = TetrisPiece.generate_piece(self)
+        
 class Tetris:
     """
     The main Tetris class
@@ -20,18 +65,39 @@ class Tetris:
         self.score = 0
         self._create_buttons()
 
-        self.status_var = tk.StringVar() 
-        self.status_var.set("Score: 0, Level: 1")
-        self.status = tk.Label(self.root,
-                               textvariable=self.status_var, 
-                               font=("Helvetica", 10, "bold"))
-        self.status.pack()
-        
-        self.canvas = tk.Canvas(
-                self.root, width=300, height=500, bg="green")
-        self.canvas.pack()
+        self.board = TetrisBoard(self)
+        self._create_canvas()
+        self._create_bindings()
+
+        self.draw_piece(self.board.current_block)
 
         self.root.mainloop()
+
+    def draw_piece (self, piece, old=None):
+        """
+        takes a piece and optionally the list of old TetrisRects
+        corresponding to it and returns a new set of TetrisRects 
+        which are how the piece is visible to the user.
+        """
+        block_size = self.board.block_size
+        color = piece.color
+        canvas = self.canvas
+        new_shape = []
+
+        if old != None and piece.moved:
+            for rect in old:
+                canvas.delete(rect)
+        
+        for point in piece.all_rotations[piece.rotation_index]:
+            x = (point[0] + piece.position[0]) * block_size
+            y = (point[1] + piece.position[1]) * block_size
+            rect = canvas.create_rectangle(x, y,
+                                           block_size + x,
+                                           block_size + y,
+                                           fill=color)
+
+        
+        
 
     def _create_buttons(self):
         """
@@ -41,15 +107,34 @@ class Tetris:
         self._buttoms = tk.Frame(self.root)
         self._buttoms.pack()
         
-        self.new_bottom = TetrisButtom(self._buttoms, "new game", color)
-        self.new_bottom.pack(side="left")
+        self._new_bottom = TetrisButtom(self._buttoms, "new game", color)
+        self._new_bottom.pack(side="left")
 
-        self.pause_bottom = TetrisButtom(self._buttoms, "pause", color)
-        self.pause_bottom.pack(side="left")
+        self._pause_bottom = TetrisButtom(self._buttoms, "pause", color)
+        self._pause_bottom.pack(side="left")
 
-        self.quit_bottom = TetrisButtom(self._buttoms, "quit", color,
+        self._quit_bottom = TetrisButtom(self._buttoms, "quit", color,
                                         self.root.destroy)
-        self.quit_bottom.pack(side="left")
+        self._quit_bottom.pack(side="left")
+
+        self.status_var = tk.StringVar() 
+        self.status_var.set("Score: 0, Level: 1")
+        self._status_label = tk.Label(self.root,
+                               textvariable=self.status_var, 
+                               font=("Helvetica", 10, "bold"))
+        self._status_label.pack()
+
+    def _create_canvas(self):
+        self.canvas = tk.Canvas(
+            self.root,
+            width=self.board.block_size * self.board.columns_count,
+            height=self.board.block_size * self.board.rows_count)
+        self.canvas.pack()
+
+    def _create_bindings(self):
+        self.root.bind('q', lambda event: self.root.destroy())
+
+        
         
 def main():
     game = Tetris()
