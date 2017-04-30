@@ -52,6 +52,7 @@ class TetrisPiece:
                              self.position[1] + delta_position[1])
             self.rotation_index = rotation_index
 
+        self.board.draw()
         return moved
 
     @classmethod
@@ -81,22 +82,22 @@ class TetrisBoard:
 
         self.game_over = False
 
+
         # Grid of the blocks store the information whether a block
         # occupies a point
         self.grid = [[None for x in range(self.columns_count)]
                      for y in range(self.rows_count)]
-        
-        self.score = 0
-        self.level = 1
 
-        self.next_piece()
+        self.current_block = TetrisPiece.generate_piece(self)
+        self.last_shape = None
+        #self.last_shape = self.game.draw_piece(self.current_block)
 
     def update(self):
         """
         Drop the current block by one
         """
         if not self.current_block.drop_one():
-            # Todo: Store the current
+            self.store_current()
             if not self.game_over:
                 self.next_piece()
             #Todo: Update the game status
@@ -110,7 +111,7 @@ class TetrisBoard:
            point[1] >= self.rows_count:
             return False # out of index
         else:
-            return self.grid[point[1]][point[0]] == None
+            return self.grid[point[1]][point[0]] is None
 
     def move_down(self):
         '''Moves the current block down'''
@@ -140,7 +141,26 @@ class TetrisBoard:
     def next_piece(self):
         '''Gets the next piece'''
         self.current_block = TetrisPiece.generate_piece(self)
-        
+        self.last_shape = None
+
+    def store_current(self):
+        """
+        Gets the information from the current piece about where it is 
+        and uses this to store the piece on the board itself. And then
+        calls remove_filled.
+        """
+        positions = self.current_block.all_rotations[
+            self.current_block.rotation_index]
+        displacement = self.current_block.position
+        for i,pos in enumerate(positions):
+            self.grid[
+                pos[1] + displacement[1]][pos[0] + displacement[0]] \
+            = self.last_shape[i]
+        #self.remove_filled()
+
+    def draw(self):
+        self.last_shape = self.game.draw_piece(self.current_block,
+                                               self.last_shape)
         
 class Tetris:
     """
@@ -154,23 +174,30 @@ class Tetris:
         self.root = tk.Tk()
         self.root.title("Tetris")
 
-        self.score = 0
         self._create_buttons()
 
         self.board = TetrisBoard(self)
+        
         self._create_canvas()
         self._create_bindings()
 
-         # Dropping interval of the current piece (ms)
-        self.interval = 500
 
-        self.shape = self.draw_piece(self.board.current_block)
-
+        self.new_game()
+        
         self.continue_game()
         self._update()
-        self._render()
         
         self.root.mainloop()
+
+    def new_game(self):
+        '''Starts a new game'''
+        # Dropping interval of the current piece (ms)
+        self.interval = 500
+
+        self.score = 0
+
+        self.shape = self.draw_piece(self.board.current_block)
+        self.board.last_shape = self.shape
 
     def draw_piece (self, piece, old=None):
         """
@@ -204,15 +231,6 @@ class Tetris:
             self.board.update()
             
         self.root.after(self.interval, self._update)
-
-    def _render(self):
-        """
-        Redraws the canvas
-        """
-        self.shape = self.draw_piece(self.board.current_block,
-                                         self.shape)
-
-        self.root.after(33, self._render)
 
     def pause_game(self):
         """
