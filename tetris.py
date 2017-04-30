@@ -18,22 +18,21 @@ class TetrisPiece:
         self.rotation_index = 0 # TODO: randomize it
         self.board = board
         self.color = random.sample(self.ALL_COLORS, 1)[0]
-        self.moved = True
         self.position = (4, 1)
 
     def drop_one(self):
         """
-        Drop the piece by one
+        Drop the piece by one, and returns whether we can drop it
         """
-        self.move((0, 1), 0)
+        return self.move((0, 1), 0)
 
     def move(self, delta_position, delta_rotation):
         """
-        takes the intended movement in position and rotation and checks
-        to see if the movement is possible.  If it is, makes this
-        movement.
+        Takes the intended movement in position and rotation and check
+        to see if the movement is possible. If it is, makes this
+        movement and return true, otherwise return false.
         """
-        self.moved = True
+        moved = True
         
         rotation_index = (self.rotation_index + delta_rotation) % \
                          len(self.all_rotations)
@@ -46,12 +45,14 @@ class TetrisPiece:
                                         delta_position[0],
                                         pos[1] + self.position[1] +
                                         delta_position[1])):
-                self.moved = False
+                moved = False
             
-        if self.moved:
+        if moved:
             self.position = (self.position[0] + delta_position[0],
                              self.position[1] + delta_position[1])
             self.rotation_index = rotation_index
+
+        return moved
 
     @classmethod
     def generate_piece(cls, board):
@@ -78,6 +79,8 @@ class TetrisBoard:
         self.columns_count = 10
         self.rows_count = 27
 
+        self.game_over = False
+
         # Grid of the blocks store the information whether a block
         # occupies a point
         self.grid = [[None for x in range(self.columns_count)]
@@ -85,13 +88,18 @@ class TetrisBoard:
         
         self.score = 0
         self.level = 1
-        self.current_block = TetrisPiece.generate_piece(self)
+
+        self.next_piece()
 
     def update(self):
         """
         Drop the current block by one
         """
-        self.current_block.drop_one()
+        if not self.current_block.drop_one():
+            # Todo: Store the current
+            if not self.game_over:
+                self.next_piece()
+            #Todo: Update the game status
 
     def empty_at(self, point):
         """
@@ -128,6 +136,11 @@ class TetrisBoard:
         '''Rotates the current piece counterclockwise'''
         if not self.game.paused:
             self.current_block.move((0, 0), -1)
+
+    def next_piece(self):
+        '''Gets the next piece'''
+        self.current_block = TetrisPiece.generate_piece(self)
+        
         
 class Tetris:
     """
