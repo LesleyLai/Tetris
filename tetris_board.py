@@ -119,7 +119,7 @@ class TetrisBoard:
 
                 # Moves down all rows above and move their blocks on
                 # the canvas
-                for j in reversed(range(2, i - 1)):
+                for j in reversed(range(2, i + 1)):
                     for block in self.grid[j - 1]:
                         if not block is None:
                             self.game.canvas.move(block,
@@ -129,5 +129,8 @@ class TetrisBoard:
 
 
     def draw(self):
+        """
+        Draws the current piece 
+        """
         self.last_shape = self.game.draw_piece(self.current_block,
                                                self.last_shape)

@@ -32,8 +32,6 @@ class Tetris:
         self.continue_game()
         self._update()
         
-        self.root.mainloop()
-
     def new_game(self):
         '''Starts a new game'''
         # Dropping interval of the current piece (ms)
@@ -143,10 +141,13 @@ class Tetris:
         self.root.bind('<Down>',
                        lambda event: self.board.rotate_clockwise())
 
-        
-        
+
 def main():
+    """
+    The start point of the game
+    """
     game = Tetris()
+    game.root.mainloop()
 
 if __name__ == '__main__':
     main()
