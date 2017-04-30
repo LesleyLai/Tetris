@@ -51,6 +51,7 @@ class TetrisPiece:
         if self.moved:
             self.position = (self.position[0] + delta_position[0],
                              self.position[1] + delta_position[1])
+            self.rotation_index = rotation_index
 
     @classmethod
     def generate_piece(cls, board):
@@ -86,6 +87,12 @@ class TetrisBoard:
         self.level = 1
         self.current_block = TetrisPiece.generate_piece(self)
 
+    def update(self):
+        """
+        Drop the current block by one
+        """
+        self.current_block.drop_one()
+
     def empty_at(self, point):
         """
         Takes a point and checks to see if it is in the bounds of the
@@ -96,15 +103,31 @@ class TetrisBoard:
             return False # out of index
         else:
             return self.grid[point[1]][point[0]] == None
-        
+
+    def move_down(self):
+        '''Moves the current block down'''
+        if not self.game.paused:
+            self.current_block.drop_one()
 
     def move_left(self):
         '''Moves the current block to left'''
-        self.current_block.move((-1, 0), 0)
+        if not self.game.paused:
+            self.current_block.move((-1, 0), 0)
 
     def move_right(self):
         '''Moves the current block to right'''
-        self.current_block.move((1, 0), 0)
+        if not self.game.paused:
+            self.current_block.move((1, 0), 0)
+
+    def rotate_clockwise(self):
+        '''Rotates the current piece clockwise'''
+        if not self.game.paused:
+            self.current_block.move((0, 0), 1)
+
+    def rotate_counterclockwise(self):
+        '''Rotates the current piece counterclockwise'''
+        if not self.game.paused:
+            self.current_block.move((0, 0), -1)
         
 class Tetris:
     """
@@ -162,12 +185,10 @@ class Tetris:
         return new_shape
 
     def _update(self):
-        """
-        Makes the current_block drop by one, do nothing if the game 
-        paused.
-        """
+        '''Update the board, do nothing if the game paused.'''
+        
         if not self.paused:
-            self.board.current_block.drop_one()
+            self.board.update()
             
         self.root.after(self.interval, self._update)
 
@@ -189,10 +210,6 @@ class Tetris:
         self._pause_bottom['bg'] = "green"
         self._pause_bottom['command'] = self.continue_game
 
-        self.root.unbind('<space>')
-        self.root.unbind('<Left>')
-        self.root.unbind('<Right>')
-
     def continue_game(self):
         """
         Continues the game after pause
@@ -201,13 +218,6 @@ class Tetris:
         self._pause_bottom["text"] = "pause"
         self._pause_bottom['bg'] = "lightcoral"
         self._pause_bottom['command'] = self.pause_game
-
-        self.root.bind('<space>',
-                       lambda event: self.board.current_block.drop_one())
-        self.root.bind('<Left>',
-                       lambda event: self.board.move_left())
-        self.root.bind('<Right>',
-                       lambda event: self.board.move_right())
 
     def _create_buttons(self):
         """
@@ -240,11 +250,22 @@ class Tetris:
             self.root,
             width=self.board.block_size * self.board.columns_count,
             height=self.board.block_size * self.board.rows_count,
-            bg="purple")
+            bg="white")
         self.canvas.pack()
 
     def _create_bindings(self):
         self.root.bind('q', lambda event: self.root.destroy())
+
+        self.root.bind('<space>',
+                       lambda event: self.board.move_down())
+        self.root.bind('<Left>',
+                       lambda event: self.board.move_left())
+        self.root.bind('<Right>',
+                       lambda event: self.board.move_right())
+        self.root.bind('<Up>',
+                       lambda event: self.board.rotate_counterclockwise())
+        self.root.bind('<Down>',
+                       lambda event: self.board.rotate_clockwise())
 
         
         
