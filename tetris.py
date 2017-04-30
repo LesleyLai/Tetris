@@ -7,6 +7,16 @@ import tkinter as tk
 
 from tetris_gui import *
 
+
+def rotations(points):
+    """
+    Figures out the different rotations of the provided piece
+    """
+    rot1 = list(map(lambda pos: (-pos[1], pos[0]), points))
+    rot2 = list(map(lambda pos: (-pos[0], -pos[1]), points))
+    rot3 = list(map(lambda pos: (pos[1], -pos[0]), points))
+    return [points, rot1, rot2, rot3]
+
 class TetrisPiece:
     """
     class responsible for the pieces and their movements
@@ -57,11 +67,16 @@ class TetrisPiece:
 
     @classmethod
     def generate_piece(cls, board):
+        '''Chooses the next piece'''
         return TetrisPiece(random.sample(cls.ALL_PIECES, 1)[0], board)
     
     ALL_PIECES = [[[(0, 0), (1, 0), (0, 1), (1, 1)]], # square
                   [[(0, 0), (-1, 0), (1, 0), (2, 0)], # long
-                   [(0, 0), (0, -1), (0, 1), (0, 2)]]]
+                   [(0, 0), (0, -1), (0, 1), (0, 2)]],
+                  rotations([(0, 0), (0, -1), (0, 1), (1, 1)]), # L
+                  rotations([(0, 0), (0, -1), (0, 1), (-1, 1)]), # _|
+                  rotations([(0, 0), (-1, 0), (0, -1), (1, -1)]), # S
+                  rotations([(0, 0), (1, 0), (0, -1), (-1, -1)])] # Z
         
     ALL_COLORS = ['DarkGreen', 'dark blue', 'blue', 'dark red',
                   'gold2', 'Purple3', 'OrangeRed2', 'LightSkyBlue']
