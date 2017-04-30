@@ -65,6 +65,16 @@ class TetrisPiece:
         
     ALL_COLORS = ['DarkGreen', 'dark blue', 'blue', 'dark red',
                   'gold2', 'Purple3', 'OrangeRed2', 'LightSkyBlue']
+
+def all_filled(collection):
+    """
+    Return true if all the element in a collection is not None
+    """
+    for elem in collection:
+        if elem is None:
+            return False
+    
+    return True
         
 
 class TetrisBoard:
@@ -90,14 +100,13 @@ class TetrisBoard:
 
         self.current_block = TetrisPiece.generate_piece(self)
         self.last_shape = None
-        #self.last_shape = self.game.draw_piece(self.current_block)
 
     def update(self):
         """
         Drop the current block by one
         """
         if not self.current_block.drop_one():
-            self.store_current()
+            self._store_current()
             if not self.game_over:
                 self.next_piece()
             #Todo: Update the game status
@@ -143,7 +152,7 @@ class TetrisBoard:
         self.current_block = TetrisPiece.generate_piece(self)
         self.last_shape = None
 
-    def store_current(self):
+    def _store_current(self):
         """
         Gets the information from the current piece about where it is 
         and uses this to store the piece on the board itself. And then
@@ -156,7 +165,32 @@ class TetrisBoard:
             self.grid[
                 pos[1] + displacement[1]][pos[0] + displacement[0]] \
             = self.last_shape[i]
-        #self.remove_filled()
+        self._remove_filled()
+
+    def _remove_filled(self):
+        """
+        Removes all filled rows and replaces them with empty ones,
+        dropping all rows above them down each time a row is removed
+        and increasing the score.
+        """
+        for i in reversed(range(2, len(self.grid))):
+            row = self.grid[i]
+            if all_filled(row):
+                for block in row:
+                    self.game.canvas.delete(block)
+                self.grid[i] = [None for x in row]
+
+                # Moves down all rows above and move their blocks on
+                # the canvas
+                for j in reversed(range(2, i - 1)):
+                    for block in self.grid[j - 1]:
+                        if not block is None:
+                            self.game.canvas.move(block,
+                                                  0, self.block_size)
+                        
+                    self.grid[j] = self.grid[j - 1]
+                    
+                    
 
     def draw(self):
         self.last_shape = self.game.draw_piece(self.current_block,
