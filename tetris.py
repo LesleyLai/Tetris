@@ -102,7 +102,7 @@ class Tetris:
         self.score += 9 + self.level
 
         # Upgrade level
-        if removed_row_count > (self.level * 5) and self.level < 200:
+        if removed_row_count > (self.level * 5) and self.level < 11:
             self.level += 1
             self.interval = 500 - int(math.log10(self.level) * 400)
 
