@@ -65,8 +65,8 @@ class TetrisPiece:
         '''Chooses the next piece'''
         return TetrisPiece(random.sample(cls.ALL_PIECES, 1)[0], board)
 
-    ALL_PIECES = [[[(0, 0), (1, 0), (0, 1), (1, 1)]], # square
-                  [[(0, 0), (-1, 0), (1, 0), (2, 0)], # long
+    ALL_PIECES = [[[(0, 0), (1, 0), (0, 1), (1, 1)]], # O
+                  [[(0, 0), (-1, 0), (1, 0), (2, 0)], # I
                    [(0, 0), (0, -1), (0, 1), (0, 2)]],
                   rotations([(0, 0), (0, -1), (0, 1), (1, 1)]), # L
                   rotations([(0, 0), (0, -1), (0, 1), (-1, 1)]), # J
@@ -75,4 +75,6 @@ class TetrisPiece:
                   rotations([(0, 0), (1, 0), (0, -1), (-1, 0)])] # T
 
     ALL_COLORS = ['DarkGreen', 'dark blue', 'blue', 'dark red',
-                  'gold2', 'Purple3', 'OrangeRed2', 'LightSkyBlue']
+                  'gold2', 'Purple3', 'OrangeRed2', 'LightSkyBlue',
+                  'lawn green', 'deep pink', 'dim gray', 'saddle brown',
+                  'orange', 'yellow']

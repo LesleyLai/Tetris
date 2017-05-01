@@ -124,9 +124,9 @@ class Tetris:
         self.score += 9 + self.level
 
         # Upgrade level
-        if removed_row_count > (self.level * 5) and self.level < 11:
+        if removed_row_count > (self.level * 5) and self.level < 21:
             self.level += 1
-            self._interval = 500 - int(math.log10(self.level) * 400)
+            self._interval = 500 - int(math.log10(self.level) * 300)
 
         self._status_var.set("Score: " + str(self.score) + \
                             ", Level: " + str(self.level))
