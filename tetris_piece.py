@@ -23,7 +23,7 @@ class TetrisPiece:
         self.rotation_index = 0 # TODO: randomize it
         self.board = board
         self.color = random.sample(self.ALL_COLORS, 1)[0]
-        self.position = (4, 1)
+        self.position = (4, 0)
 
     def drop_one(self):
         """

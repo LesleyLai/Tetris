@@ -30,9 +30,6 @@ class TetrisBoard:
         # How many rows are eliminated, decided level of the game
         self.removed_row_count = 0
 
-        self.game_over = False
-
-
         # Grid of the blocks store the information whether a block
         # occupies a point
         self.grid = [[None for x in range(self.columns_count)]
@@ -47,9 +44,10 @@ class TetrisBoard:
         """
         if not self.current_block.drop_one():
             self._store_current()
-            if not self.game_over:
+            if self.is_game_over():
+                self.game.game_over()
+            else:
                 self.next_piece()
-            #Todo: Update the game status
 
     def empty_at(self, point):
         """
@@ -92,6 +90,16 @@ class TetrisBoard:
         self.current_block = TetrisPiece.generate_piece(self)
         self.last_shape = None
 
+    def is_game_over(self):
+        """
+        Returns true if the the player lost
+        """
+        for pos in self.grid[0]:
+            if not pos is None:
+                return True
+
+        return False
+
     def _store_current(self):
         """
         Gets the information from the current piece about where it is
@@ -113,7 +121,7 @@ class TetrisBoard:
         dropping all rows above them down each time a row is removed
         and increasing the score.
         """
-        for i in range(2, len(self.grid)):
+        for i in range(0, len(self.grid)):
             row = self.grid[i]
             if all_filled(row):
                 for block in row:
@@ -132,7 +140,6 @@ class TetrisBoard:
 
                 self.removed_row_count += 1
                 self.game.scoring(self.removed_row_count)
-
 
     def draw(self):
         """

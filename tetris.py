@@ -40,6 +40,8 @@ class Tetris:
         self.score = 0
         self.level = 1
 
+        self.is_game_over = False
+
         self.shape = self.draw_piece(self.board.current_block)
         self.board.last_shape = self.shape
 
@@ -71,7 +73,7 @@ class Tetris:
     def _update(self):
         '''Update the board, do nothing if the game paused.'''
 
-        if not self.paused:
+        if not (self.paused or self.is_game_over):
             self.board.update()
 
         self.root.after(self.interval, self._update)
@@ -93,6 +95,19 @@ class Tetris:
         self._pause_bottom["text"] = "pause"
         self._pause_bottom['bg'] = "lightcoral"
         self._pause_bottom['command'] = self.pause_game
+
+    def game_over(self):
+        self.is_game_over = True
+        for row in self.board.grid:
+            for block in row:
+                self.canvas.itemconfig(block, fill="grey")
+                
+        self.canvas.create_text(self.canvas.winfo_width() / 2,
+                                self.canvas.winfo_height() / 2,
+                                fill="red",
+                                text="Game Over",
+                                font=("Helvetica", 20, "bold")
+        )
 
     def scoring(self, removed_row_count):
         """
