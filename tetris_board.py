@@ -116,9 +116,10 @@ class TetrisBoard:
             self.current_block.rotation_index]
         displacement = self.current_block.position
         for i, pos in enumerate(positions):
-            self.grid[
-                pos[1] + displacement[1]][pos[0] + displacement[0]] \
-            = self.last_shape[i]
+            x = pos[0] + displacement[0]
+            y = pos[1] + displacement[1]
+            if x >= 0 and y >= 0:
+                self.grid[y][x] = self.last_shape[i]
         self._remove_filled()
 
     def _remove_filled(self):
@@ -136,14 +137,17 @@ class TetrisBoard:
 
                 # Moves down all rows above and move their blocks on
                 # the canvas
-                for j in reversed(range(1, i)):
-                    for block in self.grid[j - 1]:
-                        if not block is None:
-                            self.game.canvas.move(block,
-                                                  0, self.block_size)
-
-                    if (j - 1 >= 0):
+                for j in reversed(range(1, i + 1)):
+                    if j > 0:
+                        for block in self.grid[j - 1]:
+                            if not block is None:
+                                self.game.canvas.move(block,
+                                                      0,
+                                                      self.block_size)
                         self.grid[j] = self.grid[j - 1]
+
+                # Refresh the status of the upper row
+                self.grid[0] = [None for x in range(self.columns_count)]
 
                 self.removed_row_count += 1
                 self.game.scoring(self.removed_row_count)
