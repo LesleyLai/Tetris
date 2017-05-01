@@ -27,6 +27,13 @@ class TetrisBoard:
         self.columns_count = 10
         self.rows_count = 27
 
+        self.reset()
+
+    def reset(self):
+        """
+        Clears board for the new game
+        """
+
         # How many rows are eliminated, decided level of the game
         self.removed_row_count = 0
 
@@ -42,12 +49,11 @@ class TetrisBoard:
         """
         Drop the current block by one
         """
-        if not self.current_block.drop_one():
+        if self.is_game_over():
+            self.game.game_over()
+        elif not self.current_block.drop_one():
             self._store_current()
-            if self.is_game_over():
-                self.game.game_over()
-            else:
-                self.next_piece()
+            self.next_piece()
 
     def empty_at(self, point):
         """
@@ -121,7 +127,7 @@ class TetrisBoard:
         dropping all rows above them down each time a row is removed
         and increasing the score.
         """
-        for i in range(0, len(self.grid)):
+        for i in range(1, len(self.grid)):
             row = self.grid[i]
             if all_filled(row):
                 for block in row:
@@ -130,13 +136,14 @@ class TetrisBoard:
 
                 # Moves down all rows above and move their blocks on
                 # the canvas
-                for j in reversed(range(2, i + 1)):
+                for j in reversed(range(1, i)):
                     for block in self.grid[j - 1]:
                         if not block is None:
                             self.game.canvas.move(block,
                                                   0, self.block_size)
 
-                    self.grid[j] = self.grid[j - 1]
+                    if (j - 1 >= 0):
+                        self.grid[j] = self.grid[j - 1]
 
                 self.removed_row_count += 1
                 self.game.scoring(self.removed_row_count)

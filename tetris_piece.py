@@ -69,9 +69,10 @@ class TetrisPiece:
                   [[(0, 0), (-1, 0), (1, 0), (2, 0)], # long
                    [(0, 0), (0, -1), (0, 1), (0, 2)]],
                   rotations([(0, 0), (0, -1), (0, 1), (1, 1)]), # L
-                  rotations([(0, 0), (0, -1), (0, 1), (-1, 1)]), # _|
+                  rotations([(0, 0), (0, -1), (0, 1), (-1, 1)]), # J
                   rotations([(0, 0), (-1, 0), (0, -1), (1, -1)]), # S
-                  rotations([(0, 0), (1, 0), (0, -1), (-1, -1)])] # Z
+                  rotations([(0, 0), (1, 0), (0, -1), (-1, -1)]), # Z
+                  rotations([(0, 0), (1, 0), (0, -1), (-1, 0)])] # T
 
     ALL_COLORS = ['DarkGreen', 'dark blue', 'blue', 'dark red',
                   'gold2', 'Purple3', 'OrangeRed2', 'LightSkyBlue']
