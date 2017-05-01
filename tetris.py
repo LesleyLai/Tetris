@@ -2,11 +2,12 @@
 The core game class for the Tetris game
 """
 
+import math
 import tkinter as tk
 
 from tetris_gui import *
 from tetris_board import TetrisBoard
-        
+
 class Tetris:
     """
     The main Tetris class
@@ -22,22 +23,22 @@ class Tetris:
         self._create_buttons()
 
         self.board = TetrisBoard(self)
-        
+
         self._create_canvas()
         self._create_bindings()
 
-
         self.new_game()
-        
+
         self.continue_game()
         self._update()
-        
+
     def new_game(self):
         '''Starts a new game'''
         # Dropping interval of the current piece (ms)
         self.interval = 500
 
         self.score = 0
+        self.level = 1
 
         self.shape = self.draw_piece(self.board.current_block)
         self.board.last_shape = self.shape
@@ -56,7 +57,7 @@ class Tetris:
         if old != None:
             for rect in old:
                 canvas.delete(rect)
-        
+
         for point in piece.all_rotations[piece.rotation_index]:
             x = (point[0] + piece.position[0]) * block_size
             y = (point[1] + piece.position[1]) * block_size
@@ -69,10 +70,10 @@ class Tetris:
 
     def _update(self):
         '''Update the board, do nothing if the game paused.'''
-        
+
         if not self.paused:
             self.board.update()
-            
+
         self.root.after(self.interval, self._update)
 
     def pause_game(self):
@@ -93,14 +94,30 @@ class Tetris:
         self._pause_bottom['bg'] = "lightcoral"
         self._pause_bottom['command'] = self.pause_game
 
+    def scoring(self, removed_row_count):
+        """
+        Updates the score when remove filled line and change
+        level accordingly
+        """
+        self.score += 9 + self.level
+
+        # Upgrade level
+        if removed_row_count > (self.level * 5) and self.level < 200:
+            self.level += 1
+            self.interval = 500 - int(math.log10(self.level) * 400)
+
+        self.status_var.set("Score: " + str(self.score) + \
+                            ", Level: " + str(self.level))
+
+
     def _create_buttons(self):
         """
         Creates buttons for the tetris game
-        """        
+        """
         color = "lightcoral"
         self._buttoms = tk.Frame(self.root)
         self._buttoms.pack()
-        
+
         self._new_bottom = TetrisButtom(self._buttoms, "new game", color)
         self._new_bottom.pack(side="left")
 
@@ -112,10 +129,10 @@ class Tetris:
                                         self.root.destroy)
         self._quit_bottom.pack(side="left")
 
-        self.status_var = tk.StringVar() 
+        self.status_var = tk.StringVar()
         self.status_var.set("Score: 0, Level: 1")
         self._status_label = tk.Label(self.root,
-                               textvariable=self.status_var, 
+                               textvariable=self.status_var,
                                font=("Helvetica", 10, "bold"))
         self._status_label.pack()
 
