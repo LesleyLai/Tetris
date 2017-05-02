@@ -101,4 +101,7 @@ ENV/
 # mkdocs documentation
 /site
 
+# The high score file of the game
+*.score
+
 # End of https://www.gitignore.io/api/python

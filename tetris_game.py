@@ -7,6 +7,7 @@ import tkinter as tk
 
 from tetris_gui import *
 from tetris_board import TetrisBoard
+from tetris_ranking import TetrisRankingList
 
 class Tetris:
     """
@@ -20,7 +21,12 @@ class Tetris:
         self.root = tk.Tk()
         self.root.title("Tetris")
 
+        self.ranking = TetrisRankingList("classic.score")
+
+        self.highest_score = self.ranking[0][0]
+
         self._create_buttons()
+        self._create_labels()
 
         self.board = TetrisBoard(self)
 
@@ -116,12 +122,18 @@ class Tetris:
                                 font=("Helvetica", 20, "bold")
         )
 
+        self.ranking.add_record(self.score)
+
     def scoring(self, removed_row_count):
         """
         Updates the score when remove filled line and change
         level accordingly
         """
         self.score += 9 + self.level
+        if self.score > self.highest_score:
+            self.highest_score = self.score
+            self._highest_score_var.set("Highest score: " + \
+                                        str(self.highest_score))
 
         # Upgrade level
         if removed_row_count > (self.level * 5) and self.level < 21:
@@ -134,29 +146,62 @@ class Tetris:
 
     def _create_buttons(self):
         """
-        Creates buttons for the Tetris game
+        Creates top buttons for the Tetris game
         """
         color = "lightcoral"
         self._buttoms = tk.Frame(self.root)
         self._buttoms.pack()
 
-        self._new_bottom = TetrisButtom(self._buttoms, "new game",
-                                        color, self.new_game)
-        self._new_bottom.pack(side="left")
+        new_bottom = TetrisButtom(self._buttoms, "new game",
+                                  color, self.new_game)
+        new_bottom.pack(side="left")
 
         self._pause_bottom = TetrisButtom(self._buttoms, "pause",
                                           color, self.pause_game)
         self._pause_bottom.pack(side="left")
 
-        self._quit_bottom = TetrisButtom(self._buttoms, "quit", color,
-                                        self.root.destroy)
-        self._quit_bottom.pack(side="left")
+        ranking_bottom = TetrisButtom(self._buttoms, "ranking",
+                                            color, self.show_ranking)
+        ranking_bottom.pack(side="left")
 
+        quit_bottom = TetrisButtom(self._buttoms, "quit", color,
+                                   self.root.destroy)
+        quit_bottom.pack(side="left")
+
+    def show_ranking(self):
+        """
+        Opens the ranking list
+        """
+        if not self.paused:
+            self.pause_game()
+        window = tk.Toplevel()
+
+        text = tk.Text(window, height=13, width=30)
+        text.insert(tk.END, "         High Scores\n\n")
+        for i in range(0, len(self.ranking)):
+            text.insert(tk.END, "No." + str(i + 1) + " " + \
+                        self.ranking[i][1] + " " + \
+                        str(self.ranking[i][0]) + "\n")
+        text.pack()
+
+    def _create_labels(self):
+        """
+        Creates text labels for the game
+        """
         self._status_var = tk.StringVar()
-        self._status_label = tk.Label(self.root,
+        status_label = tk.Label(self.root,
                                textvariable=self._status_var,
                                font=("Helvetica", 10, "bold"))
-        self._status_label.pack()
+        status_label.pack()
+
+        self._highest_score_var = tk.StringVar()
+        self._highest_score_var.set("Highest score: " + \
+                                    str(self.highest_score))
+        highest_score_label = tk.Label(self.root,
+                                textvariable=self._highest_score_var,
+                                font=("Helvetica", 10, "bold"))
+        highest_score_label.pack(side='bottom')
+        
 
     def _create_canvas(self):
         self.canvas = tk.Canvas(
