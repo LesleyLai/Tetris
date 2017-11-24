@@ -23,7 +23,10 @@ class Tetris:
 
         self.ranking = TetrisRankingList("classic.score")
 
-        self.highest_score = self.ranking[0][0]
+        try:
+            self.highest_score = self.ranking[0][0]
+        except IndexError:
+            self.highest_score = 0
 
         self._create_buttons()
         self._create_labels()
